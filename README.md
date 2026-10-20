@@ -1,14 +1,17 @@
 # Pradakshina
 
-A quiet, iPhone-first companion for 108 pradakshinas.
+A quiet, iPhone-first companion for pradakshinas, with 108 rounds as the default.
 
 **[Open the app](https://13v13reddy.github.io/pradakshina-108/)**
 
 ## A round, remembered
 
-Choose one spot on your path. When you return after a complete round, hold the large button for 850 milliseconds. One bead lights up and a persistent receipt shows the exact saved time and how long ago it was. A 12-second duplicate guard prevents immediately counting again.
+Choose your round goal, then tap **Start practice** at your chosen spot to save the start time. When you return after a complete round, hold the large button for 850 milliseconds. A persistent receipt shows the exact saved time and how long ago it was. A 12-second duplicate guard prevents immediately counting again. The final round saves the finish time and freezes the total duration.
 
-- 108 individual progress beads, with a clear completion state.
+- Preset goals of 11, 21, 54, and 108, or any custom count from 1 to 9,999.
+- Goals can change while keeping completed rounds; a goal cannot be lower than the count already saved.
+- Start and finish times, with elapsed/total wall-clock duration, including breaks.
+- One progress bead per round up to 108; larger goals use 108 proportional progress marks.
 - Timestamped round history and JSON download.
 - Confirmation before undoing a round or starting over.
 - Local progress recovery after closing or refreshing.
@@ -47,7 +50,9 @@ Open `http://localhost:4173/pradakshina-108/`. The local server also supports th
 
 The included GitHub Actions workflow tests the counting model, checks JavaScript syntax, builds the static app, and deploys `dist/` on pushes to `main`. Set the repository’s Pages source to **GitHub Actions**. Asset URLs, manifest scope, and service worker registration are relative, so the app works under the repository path.
 
-When changing cached app assets, update the cache version in `sw.js`. A successful service worker installation precaches the whole app before reporting offline readiness. Practice data stays in local storage, separately from the app cache.
+When changing cached app assets, update the cache version in `sw.js` and the matching version query on the HTML CSS/module URLs, the state-module import, and the precache list. The versioned asset URLs let an installed older service worker fetch the new modules together. A successful service worker installation precaches the whole app before reporting offline readiness. Practice data stays in local storage, separately from the app cache.
+
+Earlier saved practices migrate in place without losing receipts. Their original opening time is used as an estimated start and labeled **Opened**; a completed earlier practice uses its last round’s timestamp as the finish. New practices use the explicit **Start practice** time. Resetting starts a fresh timer while keeping the selected goal.
 
 ## Assets
 

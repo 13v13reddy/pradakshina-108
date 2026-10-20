@@ -1,6 +1,6 @@
-const CACHE = 'pradakshina-v2';
+const CACHE = 'pradakshina-v3';
 const FILES = [
-  './', './index.html', './styles.css', './app.js', './state.js', './manifest.webmanifest',
+  './', './index.html', './styles.css?v=3', './app.js?v=3', './state.js?v=3', './manifest.webmanifest',
   './assets/icon.svg', './assets/apple-touch-icon.png', './assets/icon-192.png', './assets/icon-512.png', './assets/icon-maskable.png',
   './assets/fonts/instrument-serif-regular.ttf', './assets/fonts/instrument-serif-italic.ttf',
   './assets/fonts/dm-sans-regular.ttf', './assets/fonts/dm-sans-semibold.ttf',

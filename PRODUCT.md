@@ -18,7 +18,9 @@ Keep track of completed rounds while making it easy to answer “did I already r
 Mobile use while walking at a temple. A deliberate action is performed at the same chosen point on each circuit. The application does not detect physical movement or count automatically.
 
 ## Capabilities and Constraints
-- The target is 108 completed rounds.
+- The default target is 108 completed rounds. The user also requested a custom count plus start and end times.
+- Presets of 11, 21, 54, and 108; custom goals from 1 to 9,999. Goal changes preserve saved rounds and cannot go below the completed count.
+- Tap Start practice to record the start time; the final required round records the finish time. Elapsed/total duration includes breaks and persists across reloads.
 - GitHub Pages is the requested host; creating a new repository is authorized.
 - Installable on iPhone through Safari’s Add to Home Screen.
 - Implementation decisions: hold to record; persistent timestamped receipts; a brief duplicate guard; undo with confirmation; a complete round history; local storage; an offline service worker; optional screen wake lock where available.

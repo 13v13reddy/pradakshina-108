@@ -14,8 +14,8 @@
     <link rel="manifest" href="./manifest.webmanifest">
     <link rel="preload" href="./assets/fonts/instrument-serif-regular.ttf" as="font" type="font/ttf" crossorigin>
     <link rel="preload" href="./assets/fonts/dm-sans-regular.ttf" as="font" type="font/ttf" crossorigin>
-    <link rel="stylesheet" href="./styles.css">
-    <script type="module" src="./app.js"></script>
+    <link rel="stylesheet" href="./styles.css?v=3">
+    <script type="module" src="./app.js?v=3"></script>
   </head>
   <body>
     <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -47,7 +47,7 @@
         <section class="introduction" aria-labelledby="intro-title">
           <div class="intro-copy">
             <h1 id="intro-title">Every round,<br><em>fully present.</em></h1>
-            <p class="intro-description">A quiet companion for your 108 pradakshinas.<br class="desktop-break"> Let your mind be here. We’ll keep your place.</p>
+            <p class="intro-description">A quiet companion for your pradakshinas.<br class="desktop-break"> Let your mind be here. We’ll keep your place.</p>
           </div>
           <div class="practice-note">
             <span class="note-line" aria-hidden="true"></span>
@@ -67,10 +67,16 @@
             <div class="circle-content">
               <span class="count-label" id="count-label">ROUNDS COMPLETED</span>
               <div class="count" id="count" role="status" aria-live="off">0</div>
-              <span class="goal-label" id="goal-label">of 108 pradakshinas</span>
+              <button class="goal-label" id="goal-button" aria-label="Change your round goal" aria-haspopup="dialog"><span id="goal-label">of 108 pradakshinas</span><svg class="icon" aria-hidden="true"><use href="#i-settings"/></svg></button>
               <span class="walking-label" id="walking-label">You’re on round 1</span>
             </div>
           </div>
+
+          <dl class="practice-timing" aria-label="Practice timing">
+            <div><dt id="start-time-label">Started</dt><dd><time id="start-time">—</time></dd></div>
+            <div><dt>Finished</dt><dd><time id="finish-time">—</time></dd></div>
+            <div><dt id="duration-label">Elapsed</dt><dd><span id="duration">0:00</span></dd></div>
+          </dl>
 
           <div class="receipt" id="receipt">
             <div class="receipt-icon" id="receipt-icon" aria-hidden="true"><span class="small-orbit"></span></div>
@@ -109,7 +115,7 @@
     <dialog class="sheet" id="history-dialog" aria-labelledby="history-title">
       <div class="sheet-header"><h2 id="history-title">Your rounds</h2><button class="icon-button sheet-close" aria-label="Close round history"><svg class="icon"><use href="#i-close"/></svg></button></div>
       <p class="sheet-description" id="history-description">Every round, remembered.</p>
-      <div id="history-empty" class="empty-history"><span class="empty-number">108</span><h3>A little space for your journey.</h3><p>Finish your first round and hold the button.<br>Your saved rounds will appear here.</p></div>
+      <div id="history-empty" class="empty-history"><span class="empty-number" id="empty-goal">108</span><h3>A little space for your journey.</h3><p>Start your practice, then hold after each round.<br>Your saved rounds will appear here.</p></div>
       <ol class="history-list" id="history-list" reversed></ol>
       <div class="sheet-footer" id="history-footer" hidden><button class="text-action" id="export-button"><svg class="icon"><use href="#i-download"/></svg>Download your rounds</button></div>
     </dialog>
@@ -117,11 +123,25 @@
     <dialog class="sheet" id="settings-dialog" aria-labelledby="settings-title">
       <div class="sheet-header"><h2 id="settings-title">Make yourself comfortable.</h2><button class="icon-button sheet-close" aria-label="Close settings"><svg class="icon"><use href="#i-close"/></svg></button></div>
       <p class="sheet-description">A few small things, for your practice.</p>
+      <div class="setting-row"><div><h3>Your round goal</h3><p>Choose the count that’s right for you.</p></div><button class="text-action" id="settings-goal" aria-haspopup="dialog">108 rounds</button></div>
       <div class="setting-row"><div><h3>Keep the screen awake</h3><p id="wake-description">While your practice is open.</p></div><button class="switch" id="wake-switch" role="switch" aria-checked="false" aria-label="Keep the screen awake"><span></span></button></div>
       <div class="setting-row"><div><h3>Tap instead of hold</h3><p>A lighter touch. The duplicate guard stays on.</p></div><button class="switch" id="tap-switch" role="switch" aria-checked="false" aria-label="Tap instead of hold"><span></span></button></div>
       <div class="settings-note"><h3>A little certainty.</h3><p>Every saved round leaves a time-stamped receipt. The button rests for 12 seconds after saving, so a second touch won’t count twice.</p><p>This is a manual companion. Record one round each time you return to your chosen spot.</p></div>
       <button class="text-action" id="settings-install"><svg class="icon"><use href="#i-share"/></svg>Add to your home screen</button>
       <div class="sheet-footer"><button class="text-action danger-text" id="reset-button">Start a new practice</button><p class="privacy-note">Your rounds stay in this browser, on this device.</p></div>
+    </dialog>
+
+    <dialog class="sheet goal-sheet" id="goal-dialog" aria-labelledby="goal-title">
+      <div class="sheet-header"><h2 id="goal-title">Your intention.</h2><button class="icon-button sheet-close" aria-label="Close round goal"><svg class="icon"><use href="#i-close"/></svg></button></div>
+      <p class="sheet-description">Choose your rounds. Make this practice yours.</p>
+      <form id="goal-form" novalidate>
+        <div class="goal-presets" role="group" aria-label="Common round goals"><button type="button" data-goal="11" aria-pressed="false">11</button><button type="button" data-goal="21" aria-pressed="false">21</button><button type="button" data-goal="54" aria-pressed="false">54</button><button type="button" data-goal="108" aria-pressed="true">108</button></div>
+        <label class="goal-input-label" for="goal-input">Or set your own count</label>
+        <input id="goal-input" name="goal" type="number" min="1" max="9999" step="1" inputmode="numeric" enterkeyhint="done" value="108" aria-describedby="goal-hint goal-error">
+        <p class="goal-hint" id="goal-hint">Any whole number from 1 to 9,999. Your saved rounds stay.</p>
+        <p class="goal-error" id="goal-error" role="alert" hidden></p>
+        <button class="solid-button goal-submit" type="submit" id="save-goal">Save round goal</button>
+      </form>
     </dialog>
 
     <dialog class="sheet install-sheet" id="install-dialog" aria-labelledby="install-title">

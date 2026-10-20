@@ -25,3 +25,8 @@ Empty, saved, duplicate-guarded, paused, 108 complete, offline-ready, save failu
 
 ## Constraints and decisions
 Build directly in static HTML/CSS/JS for GitHub Pages. No raster illustration is needed for this working screen; the circle is functional SVG geometry. No standing workflow preference is stored. Publish only app assets; product/design briefs remain source documentation.
+
+## Timing and custom-goal extension
+The user requested start/end times and a customizable count. Preserve the established visual world. The goal beneath the completed count is now an accessible button opening a native sheet with 11/21/54/108 presets and a numeric custom goal from 1 to 9,999. Goals preserve existing receipts and cannot go below the completed count. The circle uses one mark per round up to 108; larger goals use 108 proportional marks.
+
+Before walking, tap Start practice to save the actual start time without recording a round. A compact, always-visible three-column timing row shows Started, Finished, and Elapsed/Total time. The required final round saves the finish time and freezes the duration; undo clears the finish while retaining the start. Breaks count toward wall-clock duration. Existing v1 receipts migrate without being reset; their original opening timestamp is explicitly labeled Opened as an estimated start. New starts are exact. The count, receipts, guard, offline behavior, and visual language remain intact.

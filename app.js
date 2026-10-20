@@ -1,9 +1,10 @@
-import { GOAL, HOLD_MS, STORAGE_KEY, PREFERENCES_KEY, newPractice, parsePractice, guardRemaining, recordRound, undoRound, savePractice, ageText } from './state.js';
+import { GOAL, MAX_GOAL, HOLD_MS, STORAGE_KEY, PREFERENCES_KEY, newPractice, parsePractice, startPractice, changeGoal, elapsedMs, durationText, guardRemaining, recordRound, undoRound, savePractice, ageText } from './state.js?v=3';
 
 const $ = id => document.getElementById(id);
 const ui = Object.fromEntries(['count', 'count-label', 'goal-label', 'walking-label', 'receipt', 'receipt-title', 'receipt-detail', 'receipt-icon', 'receipt-age', 'record-button', 'record-title', 'record-subtitle', 'record-end', 'hold-fill', 'hold-help', 'practice-live', 'pause-button', 'pause-label', 'undo-button', 'error-banner', 'save-status', 'status-dot'].map(id => [id, $(id)]));
 const timeFormat = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit', second: '2-digit' });
 const dateFormat = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' });
+const clockFormat = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' });
 let practice;
 let blocked = false;
 let busy = false;
@@ -16,6 +17,8 @@ let installPrompt = null;
 let pendingConfirmation = null;
 let focusBeforeDialog = null;
 let renderedCount = -1;
+let renderedGoal = -1;
+let beads = [];
 
 function icon(name) {
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -27,16 +30,19 @@ function icon(name) {
   return svg;
 }
 
-for (let i = 0; i < GOAL; i++) {
-  const angle = ((i + .5) / GOAL) * Math.PI * 2 - Math.PI / 2;
-  const bead = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-  bead.setAttribute('cx', (180 + Math.cos(angle) * 160).toFixed(3));
-  bead.setAttribute('cy', (180 + Math.sin(angle) * 160).toFixed(3));
-  bead.setAttribute('r', i % 9 === 8 ? '3' : '2.3');
-  bead.classList.add('bead');
-  $('beads').append(bead);
+function drawBeads(goal) {
+  const total = Math.min(goal, GOAL);
+  beads = Array.from({ length: total }, (_, i) => {
+    const angle = ((i + .5) / total) * Math.PI * 2 - Math.PI / 2;
+    const bead = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    bead.setAttribute('cx', (180 + Math.cos(angle) * 160).toFixed(3));
+    bead.setAttribute('cy', (180 + Math.sin(angle) * 160).toFixed(3));
+    bead.setAttribute('r', i % 9 === 8 ? '3' : '2.3');
+    bead.classList.add('bead');
+    return bead;
+  });
+  $('beads').replaceChildren(...beads);
 }
-const beads = [...$('beads').children];
 
 function announce(message) { ui['practice-live'].textContent = message; }
 function error(message) {
@@ -59,20 +65,28 @@ function savePreferences() {
 function render() {
   if (!practice) return;
   const count = practice.entries.length;
-  const complete = count === GOAL;
+  const complete = count === practice.goal;
+  if (renderedGoal !== practice.goal) {
+    drawBeads(practice.goal);
+    renderedGoal = practice.goal;
+    renderedCount = -1;
+  }
   if (renderedCount !== count) {
     ui.count.textContent = String(count);
-    ui.count.setAttribute('aria-label', `${count} of ${GOAL} rounds completed`);
+    ui.count.setAttribute('aria-label', `${count} of ${practice.goal} rounds completed`);
+    const completedBeads = Math.floor(count / practice.goal * beads.length);
     beads.forEach((bead, i) => {
-      bead.classList.toggle('completed', i < count);
-      bead.classList.toggle('current', i === count);
+      bead.classList.toggle('completed', i < completedBeads);
+      bead.classList.toggle('current', i === completedBeads && !complete);
     });
     renderedCount = count;
     renderHistory();
   }
   ui['count-label'].textContent = complete ? 'YOUR PRACTICE IS COMPLETE' : 'ROUNDS COMPLETED';
-  ui['goal-label'].textContent = complete ? '108 rounds. A full circle.' : 'of 108 pradakshinas';
-  ui['walking-label'].textContent = complete ? 'Take a moment. You’re here.' : practice.paused ? 'Rest a moment. Your place is safe.' : `You’re on round ${count + 1}`;
+  ui['goal-label'].textContent = `of ${practice.goal} ${practice.goal === 1 ? 'pradakshina' : 'pradakshinas'}`;
+  $('goal-button').setAttribute('aria-label', `Change your round goal, currently ${practice.goal}`);
+  $('settings-goal').textContent = `${practice.goal} ${practice.goal === 1 ? 'round' : 'rounds'}`;
+  ui['walking-label'].textContent = complete ? 'A full circle. Take a moment.' : practice.startedAt === null ? 'Your practice, your pace.' : practice.paused ? 'Rest a moment. Your place is safe.' : `You’re on round ${count + 1}`;
   ui['receipt'].classList.toggle('is-saved', count > 0);
   const last = practice.entries.at(-1);
   if (last) {
@@ -86,7 +100,11 @@ function render() {
     orbit.className = 'small-orbit';
     ui['receipt-icon'].replaceChildren(orbit);
   }
-  ui['pause-button'].hidden = complete;
+  ui['pause-button'].hidden = complete || practice.startedAt === null;
+  ui['pause-button'].disabled = blocked || busy;
+  document.querySelector('.practice-actions').hidden = practice.startedAt === null;
+  document.querySelector('.action-divider').hidden = complete;
+  ui['record-end'].replaceChildren(icon(practice.startedAt === null ? 'play' : 'check'));
   ui['pause-label'].textContent = practice.paused ? 'Resume' : 'Pause';
   $('pause-icon').replaceChildren();
   const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
@@ -100,7 +118,8 @@ function renderTime() {
   if (!practice) return;
   const last = practice.entries.at(-1);
   const remaining = guardRemaining(practice);
-  const complete = practice.entries.length === GOAL;
+  const complete = practice.entries.length === practice.goal;
+  renderTiming();
   ui['receipt-age'].textContent = last ? ageText(last.at) : '';
   if (hold) return;
   let mode = 'ready';
@@ -110,23 +129,42 @@ function renderTime() {
   if (blocked) {
     mode = 'blocked'; title = 'Your saved practice needs attention'; subtitle = 'Open settings to recover or start fresh'; help = 'Your existing data has been left untouched.';
   } else if (complete) {
-    mode = 'complete'; title = '108. Every round, remembered.'; subtitle = 'Your practice is complete'; help = 'Your rounds are saved. Take this quiet moment.';
+    mode = 'complete'; title = `${practice.goal}. Every round, remembered.`; subtitle = 'Your practice is complete'; help = 'Your rounds and finish time are saved.';
+  } else if (practice.startedAt === null) {
+    mode = 'start'; title = 'Start practice'; subtitle = `${practice.goal} ${practice.goal === 1 ? 'round' : 'rounds'} · tap when you begin`; help = 'Set your goal above, then start at your chosen spot.';
   } else if (practice.paused) {
     mode = 'paused'; title = 'A moment to pause'; subtitle = 'Tap Resume when you’re ready'; help = 'Your place is saved, for as long as you need.';
   } else if (remaining > 0) {
     mode = 'guard'; title = `Round ${practice.entries.length} recorded`; subtitle = `Ready for the next in ${Math.ceil(remaining / 1000)}s`; help = 'Already saved. A second touch won’t count twice.';
   }
   ui['record-button'].dataset.mode = mode;
-  ui['record-button'].disabled = mode !== 'ready' || busy;
+  ui['record-button'].disabled = !['ready', 'start'].includes(mode) || busy;
   ui['record-title'].textContent = title;
   ui['record-subtitle'].textContent = subtitle;
   ui['hold-help'].textContent = help;
 }
 
+function renderTiming() {
+  const setTime = (id, timestamp, fallback) => {
+    const element = $(id);
+    element.textContent = timestamp === null ? fallback : clockFormat.format(timestamp);
+    if (timestamp === null) { element.removeAttribute('datetime'); element.removeAttribute('title'); }
+    else { element.dateTime = new Date(timestamp).toISOString(); element.title = new Date(timestamp).toLocaleString(); }
+  };
+  $('start-time-label').textContent = practice.startEstimated ? 'Opened' : 'Started';
+  setTime('start-time', practice.startedAt, '—');
+  if (practice.startEstimated) $('start-time').title = 'Estimated start from when this earlier practice was opened.';
+  setTime('finish-time', practice.finishedAt, practice.startedAt === null ? '—' : 'In progress');
+  $('duration-label').textContent = practice.finishedAt === null ? 'Elapsed' : 'Total time';
+  $('duration').textContent = durationText(elapsedMs(practice));
+  $('duration').title = 'Wall-clock time, including breaks';
+}
+
 function renderHistory() {
   if (!practice) return;
   const count = practice.entries.length;
-  $('history-description').textContent = count ? `${count} of ${GOAL} rounds, safely remembered.` : 'Every round, remembered.';
+  $('history-description').textContent = count ? `${count} of ${practice.goal} rounds, safely remembered.` : 'Every round, remembered.';
+  $('empty-goal').textContent = String(practice.goal);
   $('history-empty').hidden = count > 0;
   $('history-footer').hidden = count === 0;
   const rows = practice.entries.map((entry, i) => {
@@ -177,20 +215,29 @@ async function completeRound() {
   const result = await mutate(latest => recordRound(latest));
   if (result !== 'saved') return;
   const count = practice.entries.length;
-  beads[count - 1].classList.remove('just-saved');
-  void beads[count - 1].getBoundingClientRect();
-  beads[count - 1].classList.add('just-saved');
+  const bead = beads[Math.min(beads.length - 1, Math.floor((count - 1) / practice.goal * beads.length))];
+  bead.classList.remove('just-saved');
+  void bead.getBoundingClientRect();
+  bead.classList.add('just-saved');
   ui.receipt.classList.remove('is-fresh');
   void ui.receipt.getBoundingClientRect();
   ui.receipt.classList.add('is-fresh');
   // Safari does not offer vibration. The persistent visual receipt is primary.
-  try { navigator.vibrate?.(count === GOAL ? [30, 70, 30] : 30); } catch { /* Optional feedback. */ }
-  announce(count === GOAL ? '108 rounds completed. Your practice is complete and saved.' : `Round ${count} saved at ${timeFormat.format(practice.entries.at(-1).at)}. You are on round ${count + 1}.`);
-  if (count === GOAL) releaseWakeLock();
+  try { navigator.vibrate?.(count === practice.goal ? [30, 70, 30] : 30); } catch { /* Optional feedback. */ }
+  announce(count === practice.goal ? `${practice.goal} rounds completed. Finish time saved. Total time ${durationText(elapsedMs(practice))}.` : `Round ${count} saved at ${timeFormat.format(practice.entries.at(-1).at)}. You are on round ${count + 1}.`);
+  if (count === practice.goal) releaseWakeLock();
+}
+
+async function beginPractice() {
+  const result = await mutate(latest => startPractice(latest));
+  if (result === 'started') {
+    announce(`Practice started at ${timeFormat.format(practice.startedAt)}. Your goal is ${practice.goal} rounds.`);
+    if (preferences.wake) requestWakeLock();
+  }
 }
 
 function startHold(source, pointerId = null) {
-  if (ui['record-button'].disabled || preferences.tap || hold) return;
+  if (ui['record-button'].disabled || practice.startedAt === null || preferences.tap || hold) return;
   hold = { start: performance.now(), source, pointerId };
   ui['record-button'].classList.add('is-holding');
   ui['record-title'].textContent = 'Stay for a moment…';
@@ -216,7 +263,7 @@ function cancelHold() {
 }
 
 ui['record-button'].addEventListener('pointerdown', event => {
-  if (!event.isPrimary || event.button !== 0 || preferences.tap || ui['record-button'].disabled) return;
+  if (!event.isPrimary || event.button !== 0 || practice.startedAt === null || preferences.tap || ui['record-button'].disabled) return;
   event.preventDefault();
   ui['record-button'].setPointerCapture(event.pointerId);
   startHold('pointer', event.pointerId);
@@ -231,17 +278,18 @@ for (const eventName of ['pointerup', 'pointercancel', 'lostpointercapture']) {
 }
 ui['record-button'].addEventListener('contextmenu', event => event.preventDefault());
 ui['record-button'].addEventListener('keydown', event => {
-  if (![' ', 'Enter'].includes(event.key) || preferences.tap) return;
+  if (![' ', 'Enter'].includes(event.key) || practice.startedAt === null || preferences.tap) return;
   event.preventDefault();
   if (!event.repeat) startHold('keyboard');
 });
 ui['record-button'].addEventListener('keyup', event => {
-  if (![' ', 'Enter'].includes(event.key) || preferences.tap) return;
+  if (![' ', 'Enter'].includes(event.key) || practice.startedAt === null || preferences.tap) return;
   event.preventDefault();
   if (hold?.source === 'keyboard') cancelHold();
 });
 ui['record-button'].addEventListener('click', event => {
   if (ui['record-button'].disabled) return;
+  if (practice.startedAt === null) { beginPractice(); return; }
   // detail 0 is keyboard/assistive activation; pointer clicks require a hold unless tap mode is selected.
   if (preferences.tap || (event.detail === 0 && !hold)) completeRound();
 });
@@ -257,7 +305,7 @@ document.addEventListener('visibilitychange', () => {
 
 function openSheet(id) {
   cancelHold();
-  focusBeforeDialog = document.activeElement;
+  if (!document.activeElement?.closest('dialog')) focusBeforeDialog = document.activeElement;
   for (const dialog of document.querySelectorAll('dialog[open]')) dialog.close();
   if (id === 'history-dialog') renderHistory();
   $(id).showModal();
@@ -277,6 +325,42 @@ for (const sheet of document.querySelectorAll('dialog')) {
 $('history-button').addEventListener('click', () => openSheet('history-dialog'));
 $('settings-button').addEventListener('click', () => openSheet('settings-dialog'));
 for (const id of ['install-button', 'settings-install']) $(id).addEventListener('click', () => openSheet('install-dialog'));
+
+function openGoal() {
+  $('goal-input').value = String(practice.goal);
+  $('goal-error').hidden = true;
+  $('goal-input').removeAttribute('aria-invalid');
+  refreshPresets();
+  openSheet('goal-dialog');
+}
+function refreshPresets() {
+  for (const button of document.querySelectorAll('[data-goal]')) button.setAttribute('aria-pressed', String(Number(button.dataset.goal) === Number($('goal-input').value)));
+}
+for (const id of ['goal-button', 'settings-goal']) $(id).addEventListener('click', openGoal);
+for (const button of document.querySelectorAll('[data-goal]')) button.addEventListener('click', () => { $('goal-input').value = button.dataset.goal; refreshPresets(); });
+$('goal-input').addEventListener('input', refreshPresets);
+$('goal-form').addEventListener('submit', async event => {
+  event.preventDefault();
+  const goal = Number($('goal-input').value);
+  if (!Number.isInteger(goal) || goal < 1 || goal > MAX_GOAL) {
+    $('goal-error').textContent = 'Choose a whole number from 1 to 9,999.';
+    $('goal-error').hidden = false; $('goal-input').setAttribute('aria-invalid', 'true'); $('goal-input').focus(); return;
+  }
+  $('save-goal').disabled = true;
+  const result = await mutate(latest => changeGoal(latest, goal));
+  $('save-goal').disabled = false;
+  if (result === 'below-count') {
+    $('goal-error').textContent = `You’ve saved ${practice.entries.length} rounds. Choose that count or higher to keep them.`;
+    $('goal-error').hidden = false; $('goal-input').setAttribute('aria-invalid', 'true'); $('goal-input').focus();
+  } else if (result === 'goal-changed' || result === 'unchanged') {
+    $('goal-dialog').close(); announce(`Your goal is ${practice.goal} rounds. Your saved rounds are kept.`);
+    if (practice.finishedAt !== null) releaseWakeLock();
+    else if (preferences.wake) requestWakeLock();
+  } else if (!result) {
+    $('goal-error').textContent = 'Your goal was not saved. Close this sheet to check the saving message.';
+    $('goal-error').hidden = false;
+  }
+});
 
 function confirmAction({ title, description, action, cancel = 'Keep it', callback }) {
   $('confirm-title').textContent = title;
@@ -319,14 +403,14 @@ $('reset-button').addEventListener('click', () => {
         // Preserve unreadable data for recovery, rather than silently destroying it.
         const raw = localStorage.getItem(STORAGE_KEY);
         if (raw) localStorage.setItem(`${STORAGE_KEY}.recovery`, raw);
-        const fresh = newPractice(); savePractice(localStorage, fresh);
+        const fresh = newPractice(Date.now(), practice.goal); savePractice(localStorage, fresh);
         practice = fresh; blocked = false; error(''); render();
       } catch { error('A new practice couldn’t be saved. Free some device storage, then try again.'); }
       return;
     }
-    const result = await mutate(latest => latest.id !== expectedId || latest.updatedAt !== expectedUpdatedAt ? { practice: latest, reason: 'changed' } : { practice: newPractice(), reason: 'reset' });
+    const result = await mutate(latest => latest.id !== expectedId || latest.updatedAt !== expectedUpdatedAt ? { practice: latest, reason: 'changed' } : { practice: newPractice(Date.now(), latest.goal), reason: 'reset' });
     if (result === 'changed') error('Your practice changed in another tab. Check Your rounds before starting again.');
-    else if (result === 'reset') announce('A new practice is ready. You are on round 1.');
+    else if (result === 'reset') announce(`A new practice is ready. Your goal is ${practice.goal} rounds. Tap Start practice when you begin.`);
   } });
 });
 
@@ -335,7 +419,7 @@ $('tap-switch').addEventListener('click', () => {
 });
 
 async function requestWakeLock() {
-  if (!('wakeLock' in navigator) || document.visibilityState !== 'visible' || practice.paused || practice.entries.length === GOAL) return;
+  if (!('wakeLock' in navigator) || document.visibilityState !== 'visible' || practice.startedAt === null || practice.paused || practice.finishedAt !== null) return;
   try {
     if (wakeLock && !wakeLock.released) return;
     wakeLock = await navigator.wakeLock.request('screen');
@@ -357,7 +441,7 @@ if (!('wakeLock' in navigator)) {
 }
 
 $('export-button').addEventListener('click', () => {
-  const data = { app: 'Pradakshina', goal: GOAL, exportedAt: new Date().toISOString(), completed: practice.entries.length, rounds: practice.entries.map((entry, i) => ({ round: i + 1, savedAt: new Date(entry.at).toISOString() })) };
+  const data = { app: 'Pradakshina', goal: practice.goal, startedAt: practice.startedAt === null ? null : new Date(practice.startedAt).toISOString(), startEstimated: practice.startEstimated, finishedAt: practice.finishedAt === null ? null : new Date(practice.finishedAt).toISOString(), durationMs: elapsedMs(practice), exportedAt: new Date().toISOString(), completed: practice.entries.length, rounds: practice.entries.map((entry, i) => ({ round: i + 1, savedAt: new Date(entry.at).toISOString() })) };
   const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
   const link = document.createElement('a'); link.href = url; link.download = `pradakshina-${new Date().toISOString().slice(0, 10)}.json`; link.click();
   setTimeout(() => URL.revokeObjectURL(url), 30_000);
