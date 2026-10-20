@@ -86,6 +86,11 @@ typography:
     fontFamily: "DM, sans-serif"
     fontSize: "15px"
     fontWeight: 600
+  goal-caption:
+    fontFamily: "Instrument, Georgia, serif"
+    fontSize: "22px"
+    fontWeight: 400
+    lineHeight: 1.2
 rounded:
   action: "14px"
   sheet: "18px"
@@ -181,6 +186,11 @@ components:
     textColor: "{colors.ink}"
     typography: "{typography.goal-preset}"
     rounded: "{rounded.compact-action}"
+  goal-caption:
+    textColor: "{colors.sage}"
+    typography: "{typography.goal-caption}"
+    rounded: "{rounded.compact-action}"
+    padding: "6px 12px"
   goal-preset-selected:
     backgroundColor: "{colors.green}"
     textColor: "{colors.jasmine}"
@@ -246,10 +256,11 @@ The palette pairs deep green with warm botanical neutrals and a small amount of 
 - **Control** (`control`): the primary record label. Its subtitle is smaller (11px) with comfortable leading (1.4).
 - **Quiet** (`quiet`): secondary tools and timestamps. Practice tools use (11px); timestamps use tabular numerals.
 - **Timing** (`timing-label`, `timing-value`): compact supporting labels and tabular values in the persistent three-column row.
+- **Goal caption** (`goal-caption`): the italic serif “of N” inside the circle, visually paired with the count while remaining an editable button.
 - **Goal form** (`goal-input`, `goal-preset`): a readable numeric input and semibold preset choices inside the jasmine goal sheet.
 - **Label** (`label`): the functional uppercase completion-state label above the count. Its tracking helps separate state from the much larger number; it is not a decorative eyebrow pattern.
 
-**The Two Voices Rule.** Let the serif carry the heading, count, and sheet titles. Keep actions, instructions, timestamps, and state explanations in DM Sans.
+**The Two Voices Rule.** Let the serif carry the heading, count, sheet titles, and italic goal caption. Keep operational actions, instructions, timestamps, and state explanations in DM Sans.
 
 ## Layout
 
@@ -262,6 +273,8 @@ At widths up to (760px), the shell is a single practice column capped at (480px)
 At widths up to (380px), side padding becomes (20px) and the circle caps at (270px). At widths up to (340px), the history tool becomes an icon-only button with its accessible label retained. On mobile viewports no taller than (740px), the circle caps at (240px), vertical gaps tighten, and the primary action remains generous (72px minimum height). Desktop viewports no taller than (850px) also use a circle (300px). The base body allows widths down to (280px).
 
 The rhythm is deliberately irregular where the task needs it: compact tool gaps, readable receipt separation, and a generous count. Reuse observed spacing roles rather than forcing every gap into a new global grid. Interactive controls keep a minimum target of (44px); main record targets range from (72px) on short screens to (82px) on desktop.
+
+Document and body both use `touch-action: manipulation` to suppress double-tap zoom while preserving panning and pinch zoom. The deliberate record control keeps `touch-action: none` for its hold interaction. Viewport scaling remains unrestricted; no global touch-event cancellation is used.
 
 ## Elevation & Depth
 
@@ -305,7 +318,7 @@ A flat row beneath the compact timing row, introduced by a top divider. A circul
 
 ### Goal-aware bead progress
 
-A real SVG sequence rather than an illustration, with one mark per target round up to (108) and (108) proportional marks for larger goals. Completed beads use brass, the current pending bead uses jasmine, and later pending beads use muted green. Every ninth bead is more prominent. The central text gives the completed total, the chosen goal, and the active round or pause/completion instruction. The SVG is hidden from assistive technology because the equivalent count and state are textual.
+A real SVG sequence rather than an illustration, with one mark per target round up to (108) and (108) proportional marks for larger goals. Completed beads use brass, the current pending bead uses jasmine, and later pending beads use muted green. Every ninth bead is more prominent. The central text gives the completed total, the chosen goal, and the active round or pause/completion instruction. The count stack uses tighter margins (12px above and 4px below the desktop count). Status copy is centered and bounded to (78%) of the circle width; paused status reads **Practice paused** in sage. Active status remains brass, while completion reads **A full circle.** The SVG is hidden from assistive technology because the equivalent count and state are textual.
 
 ### Native sheets
 
@@ -329,7 +342,7 @@ A compact three-column definition list sits between the progress circle and rece
 
 ### Round goal form
 
-The goal inside the circle is an underlined, sage button with a small settings icon and a minimum target height (44px). It brightens to jasmine on hover, retains visible brass focus, and opens the native jasmine goal sheet. Settings supplies a second route to the same form.
+The goal inside the circle reads **of N** in italic Instrument Serif using `goal-caption`. Its sage text pairs with a small chevron (11px), without an underline. The button retains a minimum target height (44px), `compact-action` corners, and padding (6px 12px). It brightens to jasmine on hover, retains visible brass focus, and opens the native jasmine goal sheet. Settings supplies a second route to the same form.
 
 Four equal-width preset buttons offer **11**, **21**, **54**, and **108**. They have a minimum height (48px), `compact-action` corners, a thin muted border, and pond-ink text. The selected preset uses green with jasmine text and exposes `aria-pressed`. The numeric field accepts whole numbers from **1 to 9,999**, uses `goal-input` typography, a minimum height (52px), matching corners, and padding (10px 14px). Its green focus outline is offset (3px); invalid input uses clay warning for the border and visible explanation. A full-width green save action follows the hint/error text.
 

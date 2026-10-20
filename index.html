@@ -14,8 +14,8 @@
     <link rel="manifest" href="./manifest.webmanifest">
     <link rel="preload" href="./assets/fonts/instrument-serif-regular.ttf" as="font" type="font/ttf" crossorigin>
     <link rel="preload" href="./assets/fonts/dm-sans-regular.ttf" as="font" type="font/ttf" crossorigin>
-    <link rel="stylesheet" href="./styles.css?v=3">
-    <script type="module" src="./app.js?v=3"></script>
+    <link rel="stylesheet" href="./styles.css?v=4">
+    <script type="module" src="./app.js?v=4"></script>
   </head>
   <body>
     <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -29,6 +29,7 @@
       <symbol id="i-undo" viewBox="0 0 24 24"><path d="M3 10h11a7 7 0 0 1 0 14M3 10l5-5m-5 5 5 5" transform="translate(0 -3)"/></symbol>
       <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 16V3m-4 4 4-4 4 4M5 12v8h14v-8"/></symbol>
       <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-4-4 4 4 4-4M5 15v5h14v-5"/></symbol>
+      <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
     </svg>
 
     <div class="app-shell">
@@ -67,7 +68,7 @@
             <div class="circle-content">
               <span class="count-label" id="count-label">ROUNDS COMPLETED</span>
               <div class="count" id="count" role="status" aria-live="off">0</div>
-              <button class="goal-label" id="goal-button" aria-label="Change your round goal" aria-haspopup="dialog"><span id="goal-label">of 108 pradakshinas</span><svg class="icon" aria-hidden="true"><use href="#i-settings"/></svg></button>
+              <button class="goal-label" id="goal-button" aria-label="Change your round goal" aria-haspopup="dialog"><span id="goal-label">of 108</span><svg class="icon" aria-hidden="true"><use href="#i-chevron"/></svg></button>
               <span class="walking-label" id="walking-label">You’re on round 1</span>
             </div>
           </div>

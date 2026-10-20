@@ -18,6 +18,7 @@ Choose your round goal, then tap **Start practice** at your chosen spot to save 
 - Offline app shell and self-hosted fonts.
 - Pause/resume, optional screen wake lock, and an accessible tap mode.
 - Keyboard hold with Space or Enter; assistive activation is supported.
+- Double-tap zoom is disabled across the page; pinch-to-zoom remains available.
 - No accounts, analytics, external runtime requests, or backend.
 
 This is a manual counter. It does not detect your location or movement. The visible receipt helps you remember whether you recorded a round; it cannot determine whether you physically completed one.

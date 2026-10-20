@@ -1,4 +1,4 @@
-import { GOAL, MAX_GOAL, HOLD_MS, STORAGE_KEY, PREFERENCES_KEY, newPractice, parsePractice, startPractice, changeGoal, elapsedMs, durationText, guardRemaining, recordRound, undoRound, savePractice, ageText } from './state.js?v=3';
+import { GOAL, MAX_GOAL, HOLD_MS, STORAGE_KEY, PREFERENCES_KEY, newPractice, parsePractice, startPractice, changeGoal, elapsedMs, durationText, guardRemaining, recordRound, undoRound, savePractice, ageText } from './state.js?v=4';
 
 const $ = id => document.getElementById(id);
 const ui = Object.fromEntries(['count', 'count-label', 'goal-label', 'walking-label', 'receipt', 'receipt-title', 'receipt-detail', 'receipt-icon', 'receipt-age', 'record-button', 'record-title', 'record-subtitle', 'record-end', 'hold-fill', 'hold-help', 'practice-live', 'pause-button', 'pause-label', 'undo-button', 'error-banner', 'save-status', 'status-dot'].map(id => [id, $(id)]));
@@ -83,10 +83,11 @@ function render() {
     renderHistory();
   }
   ui['count-label'].textContent = complete ? 'YOUR PRACTICE IS COMPLETE' : 'ROUNDS COMPLETED';
-  ui['goal-label'].textContent = `of ${practice.goal} ${practice.goal === 1 ? 'pradakshina' : 'pradakshinas'}`;
+  ui['goal-label'].textContent = `of ${practice.goal}`;
   $('goal-button').setAttribute('aria-label', `Change your round goal, currently ${practice.goal}`);
   $('settings-goal').textContent = `${practice.goal} ${practice.goal === 1 ? 'round' : 'rounds'}`;
-  ui['walking-label'].textContent = complete ? 'A full circle. Take a moment.' : practice.startedAt === null ? 'Your practice, your pace.' : practice.paused ? 'Rest a moment. Your place is safe.' : `You’re on round ${count + 1}`;
+  ui['walking-label'].textContent = complete ? 'A full circle.' : practice.startedAt === null ? 'Your practice, your pace.' : practice.paused ? 'Practice paused' : `You’re on round ${count + 1}`;
+  ui['walking-label'].dataset.state = practice.paused && !complete ? 'paused' : 'active';
   ui['receipt'].classList.toggle('is-saved', count > 0);
   const last = practice.entries.at(-1);
   if (last) {
