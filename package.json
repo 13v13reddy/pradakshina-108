@@ -1,0 +1,14 @@
+{
+  "name": "pradakshina-108",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "One round at a time. An offline-first pradakshina companion.",
+  "scripts": {
+    "dev": "node scripts/serve.mjs",
+    "build": "node scripts/build.mjs",
+    "test": "node --test tests/*.test.js",
+    "check": "node --check app.js && node --check state.js && node --check sw.js"
+  },
+  "engines": { "node": ">=20" }
+}

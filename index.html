@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#153e35">
+    <meta name="description" content="A quiet companion for 108 pradakshinas. Hold to record each round, see exactly when it was saved, and keep your place offline.">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Pradakshina">
+    <title>Pradakshina · One round at a time</title>
+    <link rel="icon" type="image/svg+xml" href="./assets/icon.svg">
+    <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png">
+    <link rel="manifest" href="./manifest.webmanifest">
+    <link rel="preload" href="./assets/fonts/instrument-serif-regular.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="preload" href="./assets/fonts/dm-sans-regular.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="stylesheet" href="./styles.css">
+    <script type="module" src="./app.js"></script>
+  </head>
+  <body>
+    <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8M3 3v5h5m4-1v5l4 2"/></symbol>
+      <symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 21v-7m0-4V3m8 18v-9m0-4V3m8 18v-5m0-4V3M1 14h6m2-6h6m2 8h6"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+      <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M7 17 17 7M7 7h10v10"/></symbol>
+      <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14m8-14v14"/></symbol>
+      <symbol id="i-play" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7z"/></symbol>
+      <symbol id="i-undo" viewBox="0 0 24 24"><path d="M3 10h11a7 7 0 0 1 0 14M3 10l5-5m-5 5 5 5" transform="translate(0 -3)"/></symbol>
+      <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 16V3m-4 4 4-4 4 4M5 12v8h14v-8"/></symbol>
+      <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-4-4 4 4 4-4M5 15v5h14v-5"/></symbol>
+    </svg>
+
+    <div class="app-shell">
+      <header class="header">
+        <a class="wordmark" href="./" aria-label="Pradakshina home">
+          <svg class="brand-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true"><circle cx="20" cy="20" r="14" stroke="currentColor" stroke-width="1"/><path d="M20 10v20M10 20h20M13 13l14 14m0-14L13 27" stroke="currentColor" stroke-width="1"/><circle cx="20" cy="20" r="6" fill="currentColor"/><circle cx="20" cy="3" r="2" fill="currentColor"/></svg>
+          <span>pradakshina</span>
+        </a>
+        <nav class="header-actions" aria-label="Practice tools">
+          <button class="quiet-button" id="history-button" aria-label="Your rounds" aria-haspopup="dialog"><svg class="icon"><use href="#i-history"/></svg><span>Your rounds</span></button>
+          <button class="icon-button" id="settings-button" aria-label="Open settings" aria-haspopup="dialog"><svg class="icon"><use href="#i-settings"/></svg></button>
+        </nav>
+      </header>
+
+      <main id="main" class="practice-layout">
+        <section class="introduction" aria-labelledby="intro-title">
+          <div class="intro-copy">
+            <h1 id="intro-title">Every round,<br><em>fully present.</em></h1>
+            <p class="intro-description">A quiet companion for your 108 pradakshinas.<br class="desktop-break"> Let your mind be here. We’ll keep your place.</p>
+          </div>
+          <div class="practice-note">
+            <span class="note-line" aria-hidden="true"></span>
+            <p>Choose one spot on your path.<br>Hold to record each time you return.</p>
+            <p class="note-foot">One circle. One moment of attention.</p>
+          </div>
+        </section>
+
+        <section class="practice" aria-label="Your pradakshina practice">
+          <h1 class="mobile-title">One round at a time.</h1>
+          <div class="circle-wrap" id="circle-wrap">
+            <svg class="bead-circle" viewBox="0 0 360 360" aria-hidden="true">
+              <circle class="inner-orbit" cx="180" cy="180" r="139"/>
+              <g id="beads"></g>
+              <path class="orbit-marker" d="m180 4 4 6-4 6-4-6z"/>
+            </svg>
+            <div class="circle-content">
+              <span class="count-label" id="count-label">ROUNDS COMPLETED</span>
+              <div class="count" id="count" role="status" aria-live="off">0</div>
+              <span class="goal-label" id="goal-label">of 108 pradakshinas</span>
+              <span class="walking-label" id="walking-label">You’re on round 1</span>
+            </div>
+          </div>
+
+          <div class="receipt" id="receipt">
+            <div class="receipt-icon" id="receipt-icon" aria-hidden="true"><span class="small-orbit"></span></div>
+            <div class="receipt-copy">
+              <p id="receipt-title">Your first round is ahead.</p>
+              <p class="receipt-detail" id="receipt-detail">We’ll remember each one you finish.</p>
+            </div>
+            <span class="receipt-age" id="receipt-age"></span>
+          </div>
+
+          <p class="error-banner" id="error-banner" role="alert" hidden></p>
+
+          <button class="record-button" id="record-button" aria-describedby="hold-help" disabled>
+            <span class="hold-fill" id="hold-fill" aria-hidden="true"></span>
+            <span class="record-symbol" aria-hidden="true"><span class="press-ring"></span></span>
+            <span class="record-copy"><span id="record-title">Loading your practice…</span><span id="record-subtitle">Just a moment</span></span>
+            <span class="record-end" id="record-end" aria-hidden="true"><svg class="icon"><use href="#i-check"/></svg></span>
+          </button>
+          <p class="hold-help" id="hold-help">At the same spot, after every round.</p>
+
+          <div class="practice-actions">
+            <button class="quiet-button" id="pause-button"><svg class="icon" id="pause-icon"><use href="#i-pause"/></svg><span id="pause-label">Pause</span></button>
+            <span class="action-divider" aria-hidden="true"></span>
+            <button class="quiet-button" id="undo-button" disabled><svg class="icon"><use href="#i-undo"/></svg><span>Undo last</span></button>
+          </div>
+          <p class="practice-live sr-only" id="practice-live" role="status" aria-live="polite" aria-atomic="true"></p>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <span class="save-status"><span class="status-dot" id="status-dot"></span><span id="save-status">Saved on this device</span></span>
+        <button class="footer-link" id="install-button">Keep it close <svg class="icon"><use href="#i-arrow"/></svg></button>
+      </footer>
+    </div>
+
+    <dialog class="sheet" id="history-dialog" aria-labelledby="history-title">
+      <div class="sheet-header"><h2 id="history-title">Your rounds</h2><button class="icon-button sheet-close" aria-label="Close round history"><svg class="icon"><use href="#i-close"/></svg></button></div>
+      <p class="sheet-description" id="history-description">Every round, remembered.</p>
+      <div id="history-empty" class="empty-history"><span class="empty-number">108</span><h3>A little space for your journey.</h3><p>Finish your first round and hold the button.<br>Your saved rounds will appear here.</p></div>
+      <ol class="history-list" id="history-list" reversed></ol>
+      <div class="sheet-footer" id="history-footer" hidden><button class="text-action" id="export-button"><svg class="icon"><use href="#i-download"/></svg>Download your rounds</button></div>
+    </dialog>
+
+    <dialog class="sheet" id="settings-dialog" aria-labelledby="settings-title">
+      <div class="sheet-header"><h2 id="settings-title">Make yourself comfortable.</h2><button class="icon-button sheet-close" aria-label="Close settings"><svg class="icon"><use href="#i-close"/></svg></button></div>
+      <p class="sheet-description">A few small things, for your practice.</p>
+      <div class="setting-row"><div><h3>Keep the screen awake</h3><p id="wake-description">While your practice is open.</p></div><button class="switch" id="wake-switch" role="switch" aria-checked="false" aria-label="Keep the screen awake"><span></span></button></div>
+      <div class="setting-row"><div><h3>Tap instead of hold</h3><p>A lighter touch. The duplicate guard stays on.</p></div><button class="switch" id="tap-switch" role="switch" aria-checked="false" aria-label="Tap instead of hold"><span></span></button></div>
+      <div class="settings-note"><h3>A little certainty.</h3><p>Every saved round leaves a time-stamped receipt. The button rests for 12 seconds after saving, so a second touch won’t count twice.</p><p>This is a manual companion. Record one round each time you return to your chosen spot.</p></div>
+      <button class="text-action" id="settings-install"><svg class="icon"><use href="#i-share"/></svg>Add to your home screen</button>
+      <div class="sheet-footer"><button class="text-action danger-text" id="reset-button">Start a new practice</button><p class="privacy-note">Your rounds stay in this browser, on this device.</p></div>
+    </dialog>
+
+    <dialog class="sheet install-sheet" id="install-dialog" aria-labelledby="install-title">
+      <div class="sheet-header"><h2 id="install-title">A little closer.</h2><button class="icon-button sheet-close" aria-label="Close install instructions"><svg class="icon"><use href="#i-close"/></svg></button></div>
+      <p class="sheet-description">Keep your practice on your home screen.</p>
+      <div id="ios-install"><p class="install-intro">Open this page in <strong>Safari</strong> on your iPhone, then:</p><ol class="install-steps"><li><span>1</span><p>Tap <strong>Share</strong> <svg class="icon inline-icon"><use href="#i-share"/></svg> in Safari’s toolbar. In newer Safari versions, it may be inside the page menu.</p></li><li><span>2</span><p>Choose <strong>Add to Home Screen</strong>.<br>Turn on <strong>Open as Web App</strong> if shown.</p></li><li><span>3</span><p>Tap <strong>Add</strong>. Open Pradakshina from your home screen before you begin.</p></li></ol></div>
+      <div id="other-install" hidden><p class="install-intro">In your browser’s menu, choose <strong>Install app</strong> or <strong>Add to Home Screen</strong>.</p><button class="solid-button" id="native-install" hidden>Install Pradakshina</button></div>
+      <div class="install-offline"><span class="status-dot"></span><p id="offline-description">Open once with internet. After the offline download finishes, you can use it at the temple without a connection.</p></div>
+      <p class="privacy-note">Begin in the home screen app. Some iPhone versions keep Safari and home screen app data separate.</p>
+    </dialog>
+
+    <dialog class="sheet confirm-sheet" id="confirm-dialog" aria-labelledby="confirm-title" aria-describedby="confirm-description">
+      <h2 id="confirm-title">Undo the last round?</h2><p id="confirm-description"></p><div class="confirm-actions"><button class="subtle-button" id="confirm-cancel" autofocus>Keep it</button><button class="solid-button" id="confirm-action">Undo round</button></div>
+    </dialog>
+
+    <noscript><div class="noscript-message">Please enable JavaScript to use your pradakshina companion. Your rounds are saved privately in this browser.</div></noscript>
+  </body>
+</html>
