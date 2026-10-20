@@ -1,6 +1,6 @@
 ---
 name: "Pradakshina"
-description: "A quiet, deliberate companion for 108 pradakshinas."
+description: "A quiet, deliberate pradakshina companion, with 108 rounds by default."
 colors:
   green: "#153e35"
   jasmine: "#f6f3e8"
@@ -67,6 +67,25 @@ typography:
     fontSize: "11px"
     fontWeight: 600
     letterSpacing: "0.12em"
+  timing-label:
+    fontFamily: "DM, sans-serif"
+    fontSize: "11px"
+    fontWeight: 400
+    lineHeight: 1.4
+  timing-value:
+    fontFamily: "DM, sans-serif"
+    fontSize: "13px"
+    fontWeight: 400
+    lineHeight: 1.4
+  goal-input:
+    fontFamily: "DM, sans-serif"
+    fontSize: "22px"
+    fontWeight: 400
+    lineHeight: 1.4
+  goal-preset:
+    fontFamily: "DM, sans-serif"
+    fontSize: "15px"
+    fontWeight: 600
 rounded:
   action: "14px"
   sheet: "18px"
@@ -147,6 +166,24 @@ components:
   history-row:
     textColor: "{colors.ink}"
     padding: "15px 0"
+  timing-row:
+    textColor: "{colors.jasmine}"
+    padding: "8px 2px 10px"
+    width: "100%"
+  goal-input:
+    backgroundColor: "{colors.jasmine}"
+    textColor: "{colors.ink}"
+    typography: "{typography.goal-input}"
+    rounded: "{rounded.compact-action}"
+    padding: "10px 14px"
+    width: "100%"
+  goal-preset:
+    textColor: "{colors.ink}"
+    typography: "{typography.goal-preset}"
+    rounded: "{rounded.compact-action}"
+  goal-preset-selected:
+    backgroundColor: "{colors.green}"
+    textColor: "{colors.jasmine}"
 ---
 
 # Design System: Pradakshina
@@ -201,13 +238,15 @@ The palette pairs deep green with warm botanical neutrals and a small amount of 
 ### Hierarchy
 
 - **Display** (`display`): the desktop introductory heading; its fluid scale and tight leading belong to short expressive copy.
-- **Count** (`count`): the central completion total. Lining, tabular numerals keep the number stable as it changes. Mobile uses a smaller count (106px), compact widths use (96px), and short mobile screens use (94px).
+- **Count** (`count`): the central completion total. Lining, tabular numerals keep the number stable as it changes. Mobile uses a smaller count (106px), compact widths use (96px), and short mobile screens use (83px).
 - **Headline** (`headline`): sheet titles. Mobile sheets reduce to (32px); mobile confirmation titles use (31px).
 - **Mobile title** (`mobile-title`): a single reassuring line above the progress circle. It reduces to (24px) on compact widths and (23px) on short mobile screens.
 - **Introduction** (`introduction`): desktop supporting copy. The narrow desktop layout reduces it to (12px).
 - **Body** (`body`): supporting sheet descriptions and preference explanations. Longer notes loosen leading to (1.75–1.8).
 - **Control** (`control`): the primary record label. Its subtitle is smaller (11px) with comfortable leading (1.4).
 - **Quiet** (`quiet`): secondary tools and timestamps. Practice tools use (11px); timestamps use tabular numerals.
+- **Timing** (`timing-label`, `timing-value`): compact supporting labels and tabular values in the persistent three-column row.
+- **Goal form** (`goal-input`, `goal-preset`): a readable numeric input and semibold preset choices inside the jasmine goal sheet.
 - **Label** (`label`): the functional uppercase completion-state label above the count. Its tracking helps separate state from the much larger number; it is not a decorative eyebrow pattern.
 
 **The Two Voices Rule.** Let the serif carry the heading, count, and sheet titles. Keep actions, instructions, timestamps, and state explanations in DM Sans.
@@ -218,9 +257,9 @@ The desktop shell is centered, capped at (1192px), and padded horizontally by (4
 
 Between widths (761px–1000px), shell padding becomes (35px), the practice column becomes (350px), and the grid gap becomes (32px). On screens at least (800px) wide and (900px) tall, the circle grows to (360px) and the composition gains vertical breathing room.
 
-At widths up to (760px), the shell is a single practice column capped at (480px) with side padding (24px) and safe-area insets. The desktop introduction yields to the short mobile title. The practice column caps at (370px); the circle fits available width up to (320px). The receipt, large record action, helper, and quiet actions follow directly underneath. The header and saved-device footer remain within the same shell.
+At widths up to (760px), the shell is a single practice column capped at (480px) with side padding (24px) and safe-area insets. The desktop introduction yields to the short mobile title. The practice column caps at (370px); the circle fits available width up to (300px). The compact timing row, receipt, large record action, helper, and quiet actions follow directly underneath. The header and saved-device footer remain within the same shell.
 
-At widths up to (380px), side padding becomes (20px) and the circle caps at (286px). At widths up to (340px), the history tool becomes an icon-only button with its accessible label retained. On mobile viewports no taller than (740px), the circle caps at (268px), vertical gaps tighten, and the primary action remains generous (72px minimum height). The base body allows widths down to (280px).
+At widths up to (380px), side padding becomes (20px) and the circle caps at (270px). At widths up to (340px), the history tool becomes an icon-only button with its accessible label retained. On mobile viewports no taller than (740px), the circle caps at (240px), vertical gaps tighten, and the primary action remains generous (72px minimum height). Desktop viewports no taller than (850px) also use a circle (300px). The base body allows widths down to (280px).
 
 The rhythm is deliberately irregular where the task needs it: compact tool gaps, readable receipt separation, and a generous count. Reuse observed spacing roles rather than forcing every gap into a new global grid. Interactive controls keep a minimum target of (44px); main record targets range from (72px) on short screens to (82px) on desktop.
 
@@ -238,7 +277,7 @@ The practice field has no card shadows. Depth comes from the full green plane, t
 
 ## Shapes
 
-Circular forms carry progress and small confirmations: beads, the inner orbit, the receipt icon, and the primary press symbol. The SVG uses a square coordinate field (360 by 360), a bead-center radius (160), and an inner orbit radius (139). The sequence contains exactly (108) marks. Every ninth mark is slightly larger; a small brass diamond orients the top.
+Circular forms carry progress and small confirmations: beads, the inner orbit, the receipt icon, and the primary press symbol. The SVG uses a square coordinate field (360 by 360), a bead-center radius (160), and an inner orbit radius (139). The default goal is (108). Goals up to (108) use one mark per round; larger goals retain (108) marks, filled in proportion to the completed count. Every ninth mark is slightly larger; a small brass diamond orients the top.
 
 The large action uses the `action` radius. Sheets use the `sheet` radius; mobile sheets keep their rounded top corners and meet the bottom edge squarely. Mobile confirmation dialogs remain centered with the `confirmation` radius. Compact affirmative/cancel buttons use `compact-action`. Preference tracks use `switch-track`, with circular thumbs.
 
@@ -250,7 +289,7 @@ Dividers are thin tonal lines (1px). The quiet practice field is open rather tha
 
 A broad, steady brass control with a circular press symbol, two lines of clear copy, and a small check at the trailing edge. The desktop padding is held in `record-ready`; mobile reduces it to (17px 18px). Its internal fill moves from left to right during the deliberate press. Ready hover uses `record-hover`, while keyboard focus uses a jasmine outline.
 
-The default press lasts (850ms); releasing early or moving away cancels it. Successful recording updates one bead and the persistent receipt, then applies the `record-guard` surface for the duplicate guard (12 seconds). Paused and unreadable-data states use the `record-paused` treatment, while completion uses `record-complete`. These states always explain themselves in text. A preference allows a single tap while retaining the duplicate guard. Standard keyboard and assistive activation stay available.
+Before the first lap, the same control reads **Start practice** and accepts a tap to save the actual start time without recording a round. It then becomes the deliberate record action. The default press lasts (850ms); releasing early or moving away cancels it. Successful recording updates the progress circle and the persistent receipt, then applies the `record-guard` surface for the duplicate guard (12 seconds). Paused and unreadable-data states use the `record-paused` treatment, while completion uses `record-complete`. These states always explain themselves in text. A preference allows a single tap while retaining the duplicate guard. Standard keyboard and assistive activation stay available.
 
 ### Quiet buttons and practice tools
 
@@ -262,15 +301,15 @@ Compact, rounded affirmative buttons use green on jasmine. The keep/cancel actio
 
 ### Persistent saved receipt
 
-A flat row directly beneath the circle, introduced by a top divider. A circular outlined icon precedes the saved-round title and exact timestamp; relative age aligns at the trailing edge. A saved receipt changes the icon outline to brass. Its brief arriving wash settles back to the green field; the title, time, and age remain after the animation ends. Empty, saved, and failed-saving states use explicit copy.
+A flat row beneath the compact timing row, introduced by a top divider. A circular outlined icon precedes the saved-round title and exact timestamp; relative age aligns at the trailing edge. A saved receipt changes the icon outline to brass. Its brief arriving wash settles back to the green field; the title, time, and age remain after the animation ends. Empty, saved, and failed-saving states use explicit copy.
 
-### 108-bead progress
+### Goal-aware bead progress
 
-A real SVG sequence rather than an illustration. Completed beads use brass, the current pending bead uses jasmine, and later pending beads use muted green. Every ninth bead is more prominent. The central text gives the completed total, the fixed goal, and the active round or pause/completion instruction. The SVG is hidden from assistive technology because the equivalent count and state are textual.
+A real SVG sequence rather than an illustration, with one mark per target round up to (108) and (108) proportional marks for larger goals. Completed beads use brass, the current pending bead uses jasmine, and later pending beads use muted green. Every ninth bead is more prominent. The central text gives the completed total, the chosen goal, and the active round or pause/completion instruction. The SVG is hidden from assistive technology because the equivalent count and state are textual.
 
 ### Native sheets
 
-History, preferences, installation help, and confirmations use native modal dialogs. Desktop sheets are centered, with widths capped at (460px), padding (30px), and maximum height capped by the viewport (80svh) or (760px). Mobile sheets become bottom-aligned, full-width surfaces capped at (480px), with maximum height (85svh), comfortable side padding (23px), and safe-area-aware bottom padding. Confirmation dialogs remain centered and narrower.
+History, preferences, the round goal, installation help, and confirmations use native modal dialogs. Desktop sheets are centered, with widths capped at (460px), padding (30px), and maximum height capped by the viewport (80svh) or (760px). Mobile sheets become bottom-aligned, full-width surfaces capped at (480px), with maximum height (85svh), comfortable side padding (23px), and safe-area-aware bottom padding. Confirmation dialogs remain centered and narrower.
 
 The close control is a standard icon button. Escape, outside clicking, and explicit closing are supported; focus returns to the invoking control. Overflow scrolls inside the sheet and does not propagate beyond it.
 
@@ -280,7 +319,21 @@ Each preference pairs a clear title and explanation with a standard button carry
 
 ### History rows
 
-A simple divider-separated list inside jasmine, with a small brass-toned dot, a semibold round label, and a right-aligned timestamp/date column. Tabular numerals keep times aligned. Most recent rounds appear first. Empty history stays spacious and typographic; download is a plain text action beneath the real list. There are no text-entry fields, chips, or card-grid patterns in this implementation.
+A simple divider-separated list inside jasmine, with a small brass-toned dot, a semibold round label, and a right-aligned timestamp/date column. Tabular numerals keep times aligned. Most recent rounds appear first. Empty history stays spacious and typographic; download is a plain text action beneath the real list. The numeric goal field is the only text-entry field; there are no chips or card-grid patterns in this implementation.
+
+### Practice timing
+
+A compact three-column definition list sits between the progress circle and receipt. Started, Finished, and Elapsed labels use `timing-label`; values use `timing-value` with tabular numerals, centered alignment, and a single-line format. Equal-width columns have a gap (8px) and thin pond-line separators. The row remains visible before starting, while active, and after completion.
+
+**Start practice** saves an exact start before the first lap. Before starting, the time values use dashes and the elapsed value begins at zero. While active, Finished reads **In progress**. The required final round saves Finished and freezes the duration under **Total time**; undo clears the finish and resumes elapsed time while retaining the start. Duration is wall-clock time including breaks. Migrated earlier practices label their estimated start **Opened**, with explanatory title text; they do not claim an exact new start.
+
+### Round goal form
+
+The goal inside the circle is an underlined, sage button with a small settings icon and a minimum target height (44px). It brightens to jasmine on hover, retains visible brass focus, and opens the native jasmine goal sheet. Settings supplies a second route to the same form.
+
+Four equal-width preset buttons offer **11**, **21**, **54**, and **108**. They have a minimum height (48px), `compact-action` corners, a thin muted border, and pond-ink text. The selected preset uses green with jasmine text and exposes `aria-pressed`. The numeric field accepts whole numbers from **1 to 9,999**, uses `goal-input` typography, a minimum height (52px), matching corners, and padding (10px 14px). Its green focus outline is offset (3px); invalid input uses clay warning for the border and visible explanation. A full-width green save action follows the hint/error text.
+
+Changing the goal retains saved rounds and timestamps and cannot set the goal below the completed count. The textual total remains exact when goals above (108) make the circle proportional.
 
 ### Feedback and motion
 
@@ -297,12 +350,12 @@ Under reduced-motion preferences, CSS animations and transitions stop. The funct
 - **Do** show a lasting saved receipt, including exact time and relative age, after a successful record.
 - **Do** keep controls at least 44px in their interactive dimension and respect iPhone safe areas.
 - **Do** preserve keyboard access, visible focus, native dialog behavior, the tap alternative, and reduced-motion support.
-- **Do** make every bead correspond to a real completed or pending round.
+- **Do** keep bead progress tied to the chosen goal: one mark per round up to 108, then 108 proportional marks.
 
 ### Don't:
 
 - **Don't** place the primary practice content inside nested decorative cards.
 - **Don't** replace the timestamped receipt with transient animation or haptic feedback alone.
-- **Don't** use decorative geometry in place of the functional 108-mark progress sequence.
+- **Don't** use decorative geometry in place of the functional, goal-aware progress sequence.
 - **Don't** add sound, looping ambient animation, or celebratory motion to this quiet practice world.
 - **Don't** present the app as detecting physical movement or completing rounds automatically.
